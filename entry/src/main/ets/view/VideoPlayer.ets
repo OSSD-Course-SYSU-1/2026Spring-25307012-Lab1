@@ -34,6 +34,7 @@ export struct VideoPlayer {
   @Prop isFullLandscapeScreen: boolean = false; // FullLandscapeScreen state
   @Prop videoIndex: number = 0; // Video index
   @Prop screenWidth: number = 0; // Screen width
+  onVideoPlay?: () => void; // 播放回调
   @State swiperController: SwiperController | undefined = undefined;
   @State currentTime: number = 0; // Current play time point
   @State durationTime: number = 0; // Video total time

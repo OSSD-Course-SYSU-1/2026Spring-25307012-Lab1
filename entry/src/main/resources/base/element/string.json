@@ -15,6 +15,14 @@
     {
       "name": "fast_forwarding",
       "value": " 2.0X fast forwarding"
+    },
+    {
+      "name": "distributed_permission_reason",
+      "value": "用于支持跨设备流转功能，实现视频播放状态的同步"
+    },
+    {
+      "name": "get_bundle_info_reason",
+      "value": "用于获取设备信息，支持分布式流转功能"
     }
   ]
 }

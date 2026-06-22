@@ -20,6 +20,7 @@ import { formatVideoTime } from '../common/TimeUtils';
 import { SetVolume } from '../view/SetVolume';
 import { VideoData } from '../common/VideoData';
 import CommonConstants from '../constants/CommonConstants';
+import { BreakpointSystem } from '../common/BreakpointSystem';
 
 const DOMAIN = 0x0000; // Tag domain.
 
@@ -47,8 +48,11 @@ export struct VideoPlayer {
   @State isAccelerate: boolean = false; // SpeedDialog visibility state
   @State leftRateOpacity: number = 0; // SpeedDialog left opacity
   @State rightRateOpacity: number = 1; // SpeedDialog right opacity
+  @State hasError: boolean = false; // Video load error state
+  @State errorMessage: string = ''; // Error message
   private windowUtil: WindowUtil = WindowUtil.getInstance(); // Window-related utility class
   private controller: VideoController = new VideoController();
+  private breakpointSystem: BreakpointSystem = BreakpointSystem.getInstance();
 
   aboutToAppear(): void {
     this.videoInfoList = [...VideoData];
@@ -84,11 +88,11 @@ export struct VideoPlayer {
   showFeatureIconInColumn(src: ResourceStr, content?: ResourceStr) {
     Column() {
       Image(src)
-        .width(30)
+        .width(this.breakpointSystem.getIconSize('large'))
       if (content) {
         Text(content)
-          .fontSize(14)
-          .lineHeight(19)
+          .fontSize(this.breakpointSystem.getFontSize('small'))
+          .lineHeight(this.breakpointSystem.getFontSize('small') + 5)
           .fontColor(Color.White)
           .margin({ top: 5 })
       }
@@ -99,11 +103,11 @@ export struct VideoPlayer {
   showFeatureIconInRow(src: ResourceStr, content?: ResourceStr) {
     Row({ space: 3 }) {
       Image(src)
-        .width(22)
+        .width(this.breakpointSystem.getIconSize('medium'))
       if (content) {
         Text(content)
-          .fontSize(14)
-          .lineHeight(19)
+          .fontSize(this.breakpointSystem.getFontSize('small'))
+          .lineHeight(this.breakpointSystem.getFontSize('small') + 5)
           .fontColor(Color.White)
       }
     }
@@ -196,7 +200,7 @@ export struct VideoPlayer {
         .fontColor(Color.White);
     }
     .width(140)
-    .height(32)
+    .height(this.breakpointSystem.getButtonHeight())
     .padding({
       left: 16,
       right: 16
@@ -216,7 +220,7 @@ export struct VideoPlayer {
     Row() {
       Text(formatVideoTime(this.currentTime))
         .fontColor(Color.White)
-        .fontSize(12)
+        .fontSize(this.breakpointSystem.getFontSize('small'))
       Slider({
         value: this.currentTime,
         min: 0,
@@ -231,17 +235,17 @@ export struct VideoPlayer {
         .layoutWeight(1)
       Text(formatVideoTime(this.durationTime))
         .fontColor(Color.White)
-        .fontSize(12)
+        .fontSize(this.breakpointSystem.getFontSize('small'))
 
       Stack() {
         Image($r('app.media.ic_video_menu_landscape_fullscreen'))
           .fillColor($r('sys.color.white'))
-          .width($r('app.float.size_25'))
-          .height($r('app.float.size_25'))
+          .width(this.breakpointSystem.getIconSize('medium'))
+          .height(this.breakpointSystem.getIconSize('medium'))
           .margin({ left: 20 })
       }
-      .width(30)
-      .height(30)
+      .width(this.breakpointSystem.getButtonHeight())
+      .height(this.breakpointSystem.getButtonHeight())
       .onClick(() => {
         this.windowUtil.handleFullScreen(true); // Set full screen.
       })
@@ -276,6 +280,7 @@ export struct VideoPlayer {
           .onPrepared((event) => {
             if (event) {
               this.durationTime = event.duration;
+              this.hasError = false; // Reset error state on successful preparation
             }
           })
           .onUpdate((event) => {
@@ -288,7 +293,12 @@ export struct VideoPlayer {
             hilog.info(DOMAIN, 'testTag', '%{public}s', 'onFinish and showNext.');
             this.swiperController?.showNext();
           })
-        // [End showNext]
+          // [End showNext]
+          .onError(() => {
+            hilog.error(DOMAIN, 'testTag', '%{public}s', 'Video load error occurred.');
+            this.hasError = true;
+            this.errorMessage = '视频加载失败，请检查网络连接';
+          })
       } else {
         Video({})
           .controls(false)
@@ -301,7 +311,7 @@ export struct VideoPlayer {
       Button({ stateEffect: true }) {
         Image($r('app.media.play'))
       }
-      .height(56)
+      .height(this.breakpointSystem.getButtonHeight() * 1.5)
       .aspectRatio(1)
       .opacity(0.2)
       .backgroundColor(Color.Transparent)
@@ -310,11 +320,11 @@ export struct VideoPlayer {
       Button({ type: ButtonType.Circle }) {
         Image($r('sys.media.ohos_ic_public_arrow_left'))
           .fillColor(Color.White)
-          .width($r('app.float.size_24'))
-          .height($r('app.float.size_24'))
+          .width(this.breakpointSystem.getIconSize('medium'))
+          .height(this.breakpointSystem.getIconSize('medium'))
       }
-      .width($r('app.float.button_back_size'))
-      .height($r('app.float.button_back_size'))
+      .width(this.breakpointSystem.getButtonHeight())
+      .height(this.breakpointSystem.getButtonHeight())
       .backgroundColor('rgba(255,255,255,0.1)')
       .position({
         x: $r('app.float.size_25'),
@@ -330,11 +340,11 @@ export struct VideoPlayer {
 
       RelativeContainer() {
         Column({ space: 20 }) {
-          Image($r('app.media.menu_icon_user_avatar')).width(44)
+          Image($r('app.media.menu_icon_user_avatar')).width(this.breakpointSystem.getIconSize('large'))
           this.showFeatureIconInColumn($r('app.media.menu_icon_like'), '1557')
           this.showFeatureIconInColumn($r('app.media.menu_icon_comment'), '566')
           this.showFeatureIconInColumn($r('app.media.menu_icon_share'), '147')
-          Image($r('app.media.menu_icon_music_cover')).width(32)
+          Image($r('app.media.menu_icon_music_cover')).width(this.breakpointSystem.getIconSize('medium'))
         }
         .alignRules({
           right: { anchor: '__container__', align: HorizontalAlign.End },
@@ -364,6 +374,39 @@ export struct VideoPlayer {
       }) // Volume setting component
       this.SpeedGesture(); // Speed adjustment gesture component
       this.SpeedDialog(); // Speed adjustment dialog
+      
+      // Error display UI
+      if (this.hasError) {
+        Column() {
+          Column() {
+            SymbolGlyph($r('sys.symbol.exclamationmark_triangle'))
+              .fontSize(this.breakpointSystem.getIconSize('large'))
+              .fontColor([Color.White])
+            Text(this.errorMessage)
+              .fontSize(this.breakpointSystem.getFontSize('medium'))
+              .fontColor(Color.White)
+              .margin({ top: 16 })
+            Button('重试')
+              .fontSize(this.breakpointSystem.getFontSize('small'))
+              .fontColor(Color.White)
+              .backgroundColor('#007DFF')
+              .borderRadius(20)
+              .margin({ top: 20 })
+              .onClick(() => {
+                this.hasError = false;
+                this.controller.reset();
+                this.controller.start();
+              })
+          }
+          .padding(30)
+          .backgroundColor('rgba(0, 0, 0, 0.8)')
+          .borderRadius(20)
+        }
+        .width('100%')
+        .height('100%')
+        .justifyContent(FlexAlign.Center)
+        .alignItems(HorizontalAlign.Center)
+      }
     }
     .backgroundColor('#D8D8D8')
     .width('100%')

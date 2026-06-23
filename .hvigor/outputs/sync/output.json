@@ -141,11 +141,11 @@
             "material": {
               "certpath": "C:\\Users\\23615\\.ohos\\config\\default_PlayShortVideosBasedOnVideoComponent-master_4ZeQaYMztaQRyY1lqpsqNXH7N3c7KoAsQuoTS16lQkI=.cer",
               "keyAlias": "debugKey",
-              "keyPassword": "0000001B1F7BDC2A6C0242178DBC455FAE02781107C0E630E7A18E0291F5125A17D188E7574E5A7D31C0B1",
+              "keyPassword": "0000001AD3EF1733D91862989868F36E0227FCD1C2403EA3E91244AB04001EFB96B69CED1DD3D001E7FC",
               "profile": "C:\\Users\\23615\\.ohos\\config\\default_PlayShortVideosBasedOnVideoComponent-master_4ZeQaYMztaQRyY1lqpsqNXH7N3c7KoAsQuoTS16lQkI=.p7b",
               "signAlg": "SHA256withECDSA",
               "storeFile": "C:\\Users\\23615\\.ohos\\config\\default_PlayShortVideosBasedOnVideoComponent-master_4ZeQaYMztaQRyY1lqpsqNXH7N3c7KoAsQuoTS16lQkI=.p12",
-              "storePassword": "0000001BF63B8FB7C028A255DD5831CB8FB4F4601DCEDF2412F73D8B0301ED8946D5309172BD75DEE341F9"
+              "storePassword": "0000001A10B610E9554C20EB2EE1B3E192EA028B760F991F1362D9B504AA2E3C4F807A9CA126CF9DE561"
             }
           }
         ],
